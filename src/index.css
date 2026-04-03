@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #F5F0E8;
+  --color-cream-dark: #E8E0D4;
+  --color-primary: #2D4A3E;
+  --color-primary-light: #3D6354;
+  --color-primary-dark: #1E332B;
+  --color-secondary: #4A4A4A;
+  --color-accent: #8FAF9F;
+  --color-accent-light: #A8C4B6;
+  --color-danger: #C0392B;
+  --color-danger-light: #E74C3C;
+  --color-positive: #27AE60;
+  --color-positive-light: #2ECC71;
+  --color-surface: #FFFFFF;
+  --color-border: #E0D8CC;
+  --color-border-dark: #C8BFB0;
+  --color-muted: #9B9B9B;
+  --color-text: #1A1A1A;
+  --color-text-secondary: #6B6B6B;
+
+  /* Dark mode colors */
+  --color-dark-bg: #1A1A1A;
+  --color-dark-surface: #242424;
+  --color-dark-surface-elevated: #2E2E2E;
+  --color-dark-border: #3A3A3A;
+  --color-dark-text: #E8E0D4;
+  --color-dark-text-secondary: #9B9B9B;
+
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --animate-fade-in: fade-in 0.4s ease-out forwards;
+  --animate-fade-in-up: fade-in-up 0.4s ease-out forwards;
+  --animate-slide-in: slide-in 0.3s ease-out forwards;
+  --animate-slide-in-right: slide-in-right 0.3s ease-out forwards;
+  --animate-bounce-subtle: bounce-subtle 2s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-cream);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode */
+.dark body,
+body.dark {
+  background-color: var(--color-dark-bg);
+  color: var(--color-dark-text);
+}
+
+.dark .surface-card {
+  background-color: var(--color-dark-surface);
+  border-color: var(--color-dark-border);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.font-mono-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Surface card */
+.surface-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.surface-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-dark);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-primary-dark);
+}
+
+/* Input styles */
+input, textarea, select {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+}
+
+input[type="number"] {
+  font-family: var(--font-mono);
+}
+
+/* Stagger animation utility */
+.stagger-1 { animation-delay: 0ms; }
+.stagger-2 { animation-delay: 80ms; }
+.stagger-3 { animation-delay: 160ms; }
+.stagger-4 { animation-delay: 240ms; }
+.stagger-5 { animation-delay: 320ms; }
+.stagger-6 { animation-delay: 400ms; }
+.stagger-7 { animation-delay: 480ms; }
+.stagger-8 { animation-delay: 560ms; }
+.stagger-9 { animation-delay: 640ms; }
+.stagger-10 { animation-delay: 720ms; }
+.stagger-11 { animation-delay: 800ms; }
+.stagger-12 { animation-delay: 880ms; }

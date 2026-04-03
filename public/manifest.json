@@ -1,0 +1,16 @@
+{
+  "name": "Ledger — Manajemen Keuangan Pribadi",
+  "short_name": "Ledger",
+  "description": "Aplikasi manajemen keuangan pribadi yang minimalis dan lengkap.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F0E8",
+  "theme_color": "#2D4A3E",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

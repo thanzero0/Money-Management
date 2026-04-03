@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, Settings, Download, Menu, X, WifiOff, Plus } from 'lucide-react';
 import { useSettingsStore } from '../../stores/settingsStore';
@@ -15,6 +15,7 @@ export function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [quickEntryOpen, setQuickEntryOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -27,7 +28,14 @@ export function Navbar() {
     };
   }, []);
 
-  // Keyboard shortcuts
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
@@ -48,40 +56,31 @@ export function Navbar() {
   }, []);
 
   const isLanding = location.pathname === '/';
+  
+  const navBg = (isLanding && !isScrolled)
+    ? 'bg-transparent border-transparent'
+    : 'bg-[var(--color-cream)]/80 backdrop-blur-md border-[var(--color-border)] dark:bg-[var(--color-dark-bg)]/80 dark:border-[var(--color-dark-border)]';
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-200 ${
-          isLanding
-            ? 'bg-transparent'
-            : 'bg-[var(--color-cream)]/95 backdrop-blur-sm border-b border-[var(--color-border)] dark:bg-[var(--color-dark-bg)]/95 dark:border-[var(--color-dark-border)]'
-        }`}
-      >
+      <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 border-b ${navBg}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-14">
-            {/* Logo */}
+          <div className={`flex items-center justify-between transition-all duration-300 ${isLanding && !isScrolled ? 'h-24' : 'h-16'}`}>
+            
+            {/* Logo - Ultra Minimal */}
             <button
               onClick={() => navigate('/')}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              className="group hover:opacity-80 transition-opacity"
             >
-              <div className="w-8 h-8 bg-[var(--color-primary)] rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm" style={{ fontFamily: 'var(--font-serif)' }}>
-                  L
-                </span>
-              </div>
-              <span
-                className="text-lg font-semibold text-[var(--color-primary)] dark:text-[var(--color-cream)] hidden sm:inline"
-                style={{ fontFamily: 'var(--font-serif)' }}
-              >
-                Ledger
-              </span>
+              <h1 className="text-xl font-medium tracking-[0.2em] text-[var(--color-primary)] dark:text-[var(--color-dark-text)] uppercase" style={{ fontFamily: 'var(--font-serif)' }}>
+                LEDGER
+              </h1>
             </button>
 
             {/* Desktop actions */}
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center gap-2">
               {isOffline && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-yellow-50 text-yellow-700 rounded-md text-xs font-medium mr-2 border border-yellow-200">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 text-[var(--color-muted)] text-xs font-medium mr-2">
                   <WifiOff size={14} />
                   Offline
                 </div>
@@ -89,45 +88,35 @@ export function Navbar() {
 
               <button
                 onClick={() => setSearchOpen(true)}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--color-muted)] hover:text-[var(--color-secondary)] hover:bg-[var(--color-cream-dark)] dark:hover:bg-[var(--color-dark-surface-elevated)] rounded-lg transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm text-[var(--color-muted)] hover:text-[var(--color-primary)] dark:hover:text-[var(--color-dark-text)] transition-colors"
+                title="Cari Transaksi (Ctrl+K)"
               >
                 <Search size={16} />
-                <span className="text-xs">Ctrl+K</span>
               </button>
 
               <button
                 onClick={() => setQuickEntryOpen(true)}
-                className="p-2 text-[var(--color-muted)] hover:text-[var(--color-secondary)] hover:bg-[var(--color-cream-dark)] dark:hover:bg-[var(--color-dark-surface-elevated)] rounded-lg transition-colors"
+                className="p-2 text-[var(--color-muted)] hover:text-[var(--color-primary)] dark:hover:text-[var(--color-dark-text)] transition-colors"
                 title="Tambah cepat (Ctrl+N)"
               >
-                <Plus size={18} />
+                <Plus size={16} />
               </button>
 
               <button
                 onClick={() => setExportOpen(true)}
-                className="p-2 text-[var(--color-muted)] hover:text-[var(--color-secondary)] hover:bg-[var(--color-cream-dark)] dark:hover:bg-[var(--color-dark-surface-elevated)] rounded-lg transition-colors"
+                className="p-2 text-[var(--color-muted)] hover:text-[var(--color-primary)] dark:hover:text-[var(--color-dark-text)] transition-colors"
                 title="Ekspor (Ctrl+E)"
               >
-                <Download size={18} />
+                <Download size={16} />
               </button>
 
               <button
                 onClick={() => navigate('/settings')}
-                className="p-2 text-[var(--color-muted)] hover:text-[var(--color-secondary)] hover:bg-[var(--color-cream-dark)] dark:hover:bg-[var(--color-dark-surface-elevated)] rounded-lg transition-colors"
+                className="p-2 text-[var(--color-muted)] hover:text-[var(--color-primary)] dark:hover:text-[var(--color-dark-text)] transition-colors"
                 title="Pengaturan"
               >
-                <Settings size={18} />
+                <Settings size={16} />
               </button>
-
-              {settings.name && (
-                <div className="ml-2 flex items-center gap-2">
-                  <div className="w-8 h-8 bg-[var(--color-accent)] rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-semibold">
-                      {settings.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Mobile hamburger */}
@@ -145,9 +134,9 @@ export function Navbar() {
           <div className="md:hidden border-t border-[var(--color-border)] bg-[var(--color-surface)] dark:bg-[var(--color-dark-surface)] dark:border-[var(--color-dark-border)] animate-slide-in">
             <div className="px-4 py-3 space-y-1">
               {isOffline && (
-                <div className="flex items-center gap-1.5 px-3 py-2 text-yellow-700 text-sm">
+                <div className="flex items-center gap-1.5 px-3 py-2 text-[var(--color-muted)] text-sm">
                   <WifiOff size={14} />
-                  Mode Offline
+                  Offline
                 </div>
               )}
               <button

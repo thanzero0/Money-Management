@@ -8,7 +8,7 @@ import { getUserSettings, saveUserSettings } from '../db/database';
 const DEFAULT_SETTINGS: UserSettings = {
   name: '',
   default_year: new Date().getFullYear(),
-  theme: 'light',
+  theme: 'dark',
   currency: 'IDR',
   number_format: 'id',
   language: 'id',

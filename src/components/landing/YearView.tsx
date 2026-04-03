@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, BarChart3 } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 import { useTransactionStore } from '../../stores/transactionStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { formatRupiah } from '../../utils/currency';
@@ -24,13 +24,13 @@ export function YearView() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-16">
-      {/* Header / Filter */}
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] dark:border-[var(--color-dark-border)] pb-4 mb-12">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-16">
+      {/* Centered Annual Filter & Graph Shortcut */}
+      <div className="flex items-center justify-between mb-24 border-b border-[var(--color-border)] dark:border-[var(--color-dark-border)] pb-8 px-4">
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className="text-xl sm:text-2xl font-medium bg-transparent text-[var(--color-primary)] dark:text-[var(--color-cream)] focus:outline-none cursor-pointer appearance-none"
+          className="text-xl sm:text-2xl font-medium bg-transparent text-[var(--color-primary)] dark:text-[var(--color-cream)] focus:outline-none cursor-pointer appearance-none text-center"
           style={{ fontFamily: 'var(--font-serif)' }}
         >
           {years.map((y) => (
@@ -40,37 +40,39 @@ export function YearView() {
 
         <button
           onClick={() => navigate('/charts')}
-          className="flex items-center gap-2 text-xs font-medium text-[var(--color-muted)] hover:text-[var(--color-primary)] dark:hover:text-[var(--color-dark-text)] uppercase tracking-widest transition-colors"
+          className="flex items-center gap-2 text-[10px] font-medium text-[var(--color-muted)] hover:text-[var(--color-primary)] dark:hover:text-[var(--color-dark-text)] uppercase tracking-[0.2em] transition-colors"
         >
           <BarChart3 size={14} />
-          Grafik
+          Grafik Tren
         </button>
       </div>
 
-      {/* Annual Summary - Ultra clean */}
-      <div className="flex flex-wrap gap-8 sm:gap-16 mb-16 px-2">
-        <div>
-          <p className="text-[10px] text-[var(--color-muted)] uppercase tracking-widest mb-2">Pemasukan</p>
-          <p className="text-xl sm:text-2xl text-[var(--color-text)] dark:text-[var(--color-dark-text)] font-mono-number font-medium">
+      {/* Centered Annual Summary */}
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-12 sm:gap-24 mb-32 border-b border-[var(--color-border)] dark:border-[var(--color-dark-border)] pb-24">
+        <div className="text-center">
+          <p className="text-[10px] text-[var(--color-muted)] uppercase tracking-widest mb-3">Pemasukan Global</p>
+          <p className="text-xl sm:text-3xl text-[var(--color-text)] dark:text-[var(--color-dark-text)] font-mono-number font-medium tracking-tight">
             {formatRupiah(yearSummary.pemasukan)}
           </p>
         </div>
-        <div>
-          <p className="text-[10px] text-[var(--color-muted)] uppercase tracking-widest mb-2">Pengeluaran</p>
-          <p className="text-xl sm:text-2xl text-[var(--color-text)] dark:text-[var(--color-dark-text)] font-mono-number font-medium">
+        <div className="text-center hidden sm:block w-px h-12 bg-[var(--color-border)] dark:bg-[var(--color-dark-border)]"></div>
+        <div className="text-center">
+          <p className="text-[10px] text-[var(--color-muted)] uppercase tracking-widest mb-3">Pengeluaran Global</p>
+          <p className="text-xl sm:text-3xl text-[var(--color-text)] dark:text-[var(--color-dark-text)] font-mono-number font-medium tracking-tight">
             {formatRupiah(yearSummary.pengeluaran)}
           </p>
         </div>
-        <div>
-          <p className="text-[10px] text-[var(--color-muted)] uppercase tracking-widest mb-2">Saldo Bersih</p>
-          <p className={`text-xl sm:text-2xl font-mono-number font-bold ${yearSummary.saldo < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-primary)] dark:text-[var(--color-dark-text)]'}`}>
+        <div className="text-center hidden sm:block w-px h-12 bg-[var(--color-border)] dark:bg-[var(--color-dark-border)]"></div>
+        <div className="text-center">
+          <p className="text-[10px] text-[var(--color-muted)] uppercase tracking-widest mb-3">Saldo Akumulasi</p>
+          <p className={`text-xl sm:text-3xl font-mono-number font-medium tracking-tight ${yearSummary.saldo < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-primary)] dark:text-[var(--color-dark-text)]'}`}>
             {formatRupiah(yearSummary.saldo)}
           </p>
         </div>
       </div>
 
-      {/* Minimalist Month Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[var(--color-border)] dark:bg-[var(--color-dark-border)] border border-[var(--color-border)] dark:border-[var(--color-dark-border)]">
+      {/* Extreme Minimalist Centered Month Grid Without Boxes */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-20 gap-x-12 pb-32">
         {MONTH_NAMES_ID.map((monthName, idx) => {
           const yearMonth = `${selectedYear}-${(idx + 1).toString().padStart(2, '0')}`;
           const summary = getMonthSummary(yearMonth);
@@ -80,34 +82,20 @@ export function YearView() {
             <button
               key={idx}
               onClick={() => navigate(`/month/${yearMonth}`)}
-              className="bg-[var(--color-cream)] dark:bg-[var(--color-dark-bg)] p-6 text-left hover:bg-[var(--color-surface)] dark:hover:bg-[var(--color-dark-surface)] transition-all group flex flex-col justify-between min-h-[160px]"
+              className="text-center group flex flex-col items-center justify-center hover:-translate-y-1 transition-transform duration-300"
             >
-              <div>
-                <h3 className="text-sm font-semibold text-[var(--color-primary)] dark:text-[var(--color-dark-text)] tracking-wider mb-5">
-                  {monthName}
-                </h3>
-                
-                {hasData ? (
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-[var(--color-muted)] font-medium uppercase tracking-wider text-[9px]">Pemasukan</span>
-                      <span className="font-mono-number text-[var(--color-text)] dark:text-[var(--color-dark-text)]">{formatRupiah(summary.pemasukan)}</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-[var(--color-muted)] font-medium uppercase tracking-wider text-[9px]">Pengeluaran</span>
-                      <span className="font-mono-number text-[var(--color-text)] dark:text-[var(--color-dark-text)]">{formatRupiah(summary.pengeluaran)}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-[var(--color-muted)]/40 mt-1">—</p>
-                )}
-              </div>
-
-              <div className="mt-6 flex items-end justify-between">
-                <span className={`text-sm font-semibold font-mono-number ${summary.saldo < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-primary)] dark:text-[var(--color-dark-text)]'}`}>
-                  {hasData ? formatRupiah(summary.saldo) : ''}
-                </span>
-                <ArrowRight size={14} className="text-[var(--color-muted)] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-transform" />
+              <h3 className="text-xs font-semibold text-[var(--color-primary)] dark:text-[var(--color-dark-text)] tracking-[0.2em] uppercase mb-4 opacity-80 group-hover:opacity-100 transition-opacity">
+                {monthName}
+              </h3>
+              
+              <div className="h-4 flex items-center justify-center">
+               {hasData ? (
+                 <span className={`text-xs font-mono-number tracking-wider ${summary.saldo < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-muted)] dark:text-[var(--color-dark-text)]'}`}>
+                   {formatRupiah(summary.saldo)}
+                 </span>
+               ) : (
+                 <span className="text-[10px] text-[var(--color-muted)]/30 group-hover:text-[var(--color-muted)] transition-colors">—</span>
+               )}
               </div>
             </button>
           );

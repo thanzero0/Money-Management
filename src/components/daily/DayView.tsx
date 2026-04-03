@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Plus, Trash2, GripVertical } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -36,9 +36,6 @@ function SortableRow({
   const [localPengeluaran, setLocalPengeluaran] = useState(tx.pengeluaran > 0 ? tx.pengeluaran.toString() : '');
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  const allCategories = [...categories.income, ...categories.expense];
-  const isIncome = isIncomeCategory(tx.kategori, categories.income.filter(c => ![...['Uang Saku / Jajan', 'Stipend PKL', 'Freelance / Project', 'Lain-lain (Pemasukan)']].includes(c)));
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -58,10 +55,7 @@ function SortableRow({
       if (val > 0) {
         onUpdate(tx.id, 'pengeluaran', 0);
         setLocalPengeluaran('');
-        // Auto-select income category if expense category is selected
-        if (!isIncomeCategory(tx.kategori)) {
-          onUpdate(tx.id, 'kategori', categories.income[0]);
-        }
+        if (!isIncomeCategory(tx.kategori)) onUpdate(tx.id, 'kategori', categories.income[0]);
       }
     }
     setFocusedField(null);
@@ -74,38 +68,30 @@ function SortableRow({
       if (val > 0) {
         onUpdate(tx.id, 'pemasukan', 0);
         setLocalPemasukan('');
-        if (isIncomeCategory(tx.kategori)) {
-          onUpdate(tx.id, 'kategori', categories.expense[0]);
-        }
+        if (isIncomeCategory(tx.kategori)) onUpdate(tx.id, 'kategori', categories.expense[0]);
       }
     }
     setFocusedField(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
-    if (e.key === 'Tab' || e.key === 'Enter') {
-      // Let Tab naturally move to next input
-      if (e.key === 'Enter' && field === 'pengeluaran' && isLast) {
-        e.preventDefault();
-        onAddRow();
-      }
+    if (e.key === 'Enter' && field === 'pengeluaran' && isLast) {
+      e.preventDefault();
+      onAddRow();
     }
   };
 
   return (
-    <tr ref={setNodeRef} style={style} className="border-b border-[var(--color-border)]/40 dark:border-[var(--color-dark-border)]/40 hover:bg-[var(--color-cream)]/30 dark:hover:bg-[var(--color-dark-surface-elevated)]/30">
-      {/* Drag handle + index */}
-      <td className="py-1.5 px-2 text-center w-12">
-        <div className="flex items-center gap-1">
-          <button {...attributes} {...listeners} className="cursor-grab text-[var(--color-muted)] hover:text-[var(--color-secondary)] touch-none">
+    <tr ref={setNodeRef} style={style} className="border-b border-[var(--color-border)] dark:border-[var(--color-dark-border)] hover:bg-[var(--color-cream-dark)]/50 dark:hover:bg-[var(--color-dark-surface-elevated)]/50 group">
+      <td className="py-2 px-2 text-center w-8">
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button {...attributes} {...listeners} className="cursor-grab text-[var(--color-muted)] hover:text-[var(--color-primary)] touch-none">
             <GripVertical size={14} />
           </button>
-          <span className="text-xs text-[var(--color-muted)] font-mono-number">{index + 1}</span>
         </div>
       </td>
 
-      {/* Keterangan */}
-      <td className="py-1.5 px-2">
+      <td className="py-2 px-2">
         <input
           type="text"
           value={localKeterangan}
@@ -114,16 +100,15 @@ function SortableRow({
           onFocus={() => setFocusedField('keterangan')}
           onKeyDown={(e) => handleKeyDown(e, 'keterangan')}
           placeholder="Keterangan..."
-          className="w-full px-2 py-1 text-sm bg-transparent border-0 focus:bg-[var(--color-surface)] dark:focus:bg-[var(--color-dark-surface)] focus:border focus:border-[var(--color-accent)] rounded text-[var(--color-text)] dark:text-[var(--color-dark-text)] placeholder:text-[var(--color-muted)]/50 outline-none"
+          className="w-full px-2 py-1.5 text-sm bg-transparent border border-transparent focus:bg-[var(--color-surface)] dark:focus:bg-[var(--color-dark-surface)] focus:border-[var(--color-border)] rounded text-[var(--color-text)] dark:text-[var(--color-dark-text)] placeholder:text-[var(--color-muted)]/40 outline-none transition-colors"
         />
       </td>
 
-      {/* Kategori */}
-      <td className="py-1.5 px-2">
+      <td className="py-2 px-2">
         <select
           value={tx.kategori}
           onChange={(e) => onUpdate(tx.id, 'kategori', e.target.value)}
-          className="w-full px-2 py-1 text-sm bg-transparent border-0 focus:bg-[var(--color-surface)] dark:focus:bg-[var(--color-dark-surface)] focus:border focus:border-[var(--color-accent)] rounded text-[var(--color-text)] dark:text-[var(--color-dark-text)] outline-none appearance-none cursor-pointer"
+          className="w-full px-2 py-1.5 text-sm bg-transparent border border-transparent focus:bg-[var(--color-surface)] dark:focus:bg-[var(--color-dark-surface)] focus:border-[var(--color-border)] rounded text-[var(--color-text)] dark:text-[var(--color-dark-text)] outline-none appearance-none cursor-pointer transition-colors"
         >
           <optgroup label="Pemasukan">
             {categories.income.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -134,8 +119,7 @@ function SortableRow({
         </select>
       </td>
 
-      {/* Pemasukan */}
-      <td className="py-1.5 px-2">
+      <td className="py-2 px-2">
         <input
           type={focusedField === 'pemasukan' ? 'number' : 'text'}
           value={focusedField === 'pemasukan' ? localPemasukan : (tx.pemasukan > 0 ? formatRupiah(tx.pemasukan) : '')}
@@ -147,12 +131,11 @@ function SortableRow({
           onBlur={handleBlurPemasukan}
           onKeyDown={(e) => handleKeyDown(e, 'pemasukan')}
           placeholder="—"
-          className="w-full px-2 py-1 text-sm text-right bg-transparent border-0 focus:bg-[var(--color-surface)] dark:focus:bg-[var(--color-dark-surface)] focus:border focus:border-[var(--color-accent)] rounded font-mono-number text-[var(--color-positive)] placeholder:text-[var(--color-muted)]/30 outline-none"
+          className="w-full px-2 py-1.5 text-sm text-right bg-transparent border border-transparent focus:bg-[var(--color-surface)] dark:focus:bg-[var(--color-dark-surface)] focus:border-[var(--color-border)] rounded font-mono-number text-[var(--color-positive)] dark:text-[var(--color-dark-text)] placeholder:text-[var(--color-muted)]/30 outline-none transition-colors"
         />
       </td>
 
-      {/* Pengeluaran */}
-      <td className="py-1.5 px-2">
+      <td className="py-2 px-2">
         <input
           type={focusedField === 'pengeluaran' ? 'number' : 'text'}
           value={focusedField === 'pengeluaran' ? localPengeluaran : (tx.pengeluaran > 0 ? formatRupiah(tx.pengeluaran) : '')}
@@ -164,17 +147,17 @@ function SortableRow({
           onBlur={handleBlurPengeluaran}
           onKeyDown={(e) => handleKeyDown(e, 'pengeluaran')}
           placeholder="—"
-          className="w-full px-2 py-1 text-sm text-right bg-transparent border-0 focus:bg-[var(--color-surface)] dark:focus:bg-[var(--color-dark-surface)] focus:border focus:border-[var(--color-accent)] rounded font-mono-number text-[var(--color-danger)] placeholder:text-[var(--color-muted)]/30 outline-none"
+          className="w-full px-2 py-1.5 text-sm text-right bg-transparent border border-transparent focus:bg-[var(--color-surface)] dark:focus:bg-[var(--color-dark-surface)] focus:border-[var(--color-border)] rounded font-mono-number text-[var(--color-danger)] placeholder:text-[var(--color-muted)]/30 outline-none transition-colors"
         />
       </td>
 
-      {/* Delete */}
-      <td className="py-1.5 px-2 text-center w-10">
+      <td className="py-2 px-2 text-center w-10">
         <button
           onClick={() => onDelete(tx.id)}
-          className="p-1 text-[var(--color-muted)] hover:text-[var(--color-danger)] transition-colors rounded"
+          className="p-1 text-[var(--color-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-danger)] transition-all rounded"
+          tabIndex={-1}
         >
-          <Trash2 size={14} />
+          <Trash2 size={14} strokeWidth={1.5} />
         </button>
       </td>
     </tr>
@@ -201,33 +184,16 @@ export function DayView() {
   const dateObj = parseISODate(date);
   const yearMonth = date.substring(0, 7);
 
-  const categories = getAllCategories(
-    settings.custom_income_categories,
-    settings.custom_expense_categories
-  );
+  const categories = getAllCategories(settings.custom_income_categories, settings.custom_expense_categories);
 
-  useEffect(() => {
-    loadTransactionsByDate(date);
-  }, [date]);
+  useEffect(() => { loadTransactionsByDate(date); }, [date]);
 
-  // "/"" shortcut to add row
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
-      if (e.key === '/') {
-        e.preventDefault();
-        handleAddRow();
-      }
-      if (e.key === 'ArrowLeft') {
-        const prev = new Date(dateObj);
-        prev.setDate(prev.getDate() - 1);
-        navigate(`/day/${toISODate(prev)}`);
-      }
-      if (e.key === 'ArrowRight') {
-        const next = new Date(dateObj);
-        next.setDate(next.getDate() + 1);
-        navigate(`/day/${toISODate(next)}`);
-      }
+      if (e.key === '/') { e.preventDefault(); handleAddRow(); }
+      if (e.key === 'ArrowLeft') { const d = new Date(dateObj); d.setDate(d.getDate() - 1); navigate(`/day/${toISODate(d)}`); }
+      if (e.key === 'ArrowRight') { const d = new Date(dateObj); d.setDate(d.getDate() + 1); navigate(`/day/${toISODate(d)}`); }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
@@ -257,118 +223,53 @@ export function DayView() {
       pengeluaran: 0,
     });
     await loadTransactionsByDate(date);
-    // Focus the new row's keterangan input after render
     setTimeout(() => {
       const inputs = document.querySelectorAll<HTMLInputElement>('table tbody tr:last-child input[type="text"]');
       if (inputs.length > 0) inputs[0].focus();
     }, 100);
   };
 
-  const handleUpdate = async (id: string, field: string, value: any) => {
-    await updateTransaction(id, { [field]: value });
-  };
-
-  const handleDelete = async (id: string) => {
-    const tx = transactions.find((t) => t.id === id);
-    await deleteTransaction(id);
-    toast.undo(
-      `Transaksi "${tx?.keterangan || 'item'}" dihapus`,
-      async () => {
-        await restoreTransaction(id);
-        await loadTransactionsByDate(date);
-      }
-    );
-  };
-
   const summary = getDailySummary(date);
-
-  // Navigation dates
-  const prevDate = new Date(dateObj);
-  prevDate.setDate(prevDate.getDate() - 1);
-  const nextDate = new Date(dateObj);
-  nextDate.setDate(nextDate.getDate() + 1);
-
   const [dailyNote, setDailyNote] = useState('');
+  
+  const prevDate = new Date(dateObj); prevDate.setDate(prevDate.getDate() - 1);
+  const nextDate = new Date(dateObj); nextDate.setDate(nextDate.getDate() + 1);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-16 pb-20">
+      {/* Detailed Header - Minimal */}
+      <div className="flex items-center justify-between mb-10 border-b border-[var(--color-border)] dark:border-[var(--color-dark-border)] pb-4">
         <button
           onClick={() => navigate(`/month/${yearMonth}`)}
-          className="flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-secondary)] transition-colors"
+          className="flex items-center gap-2 text-xs font-medium text-[var(--color-muted)] hover:text-[var(--color-primary)] dark:hover:text-[var(--color-dark-text)] uppercase tracking-widest transition-colors"
         >
-          <ArrowLeft size={16} />
-          Kembali ke {yearMonth}
+          <ArrowLeft size={14} />
+          Kembali
         </button>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => navigate(`/day/${toISODate(prevDate)}`)}
-            className="p-1.5 hover:bg-[var(--color-cream-dark)] dark:hover:bg-[var(--color-dark-surface-elevated)] rounded-lg transition-colors"
-          >
-            <ArrowLeft size={16} className="text-[var(--color-muted)]" />
+        <div className="flex items-center gap-6">
+          <button onClick={() => navigate(`/day/${toISODate(prevDate)}`)} className="text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors">
+            <ArrowLeft size={16} />
           </button>
-          <span className="text-sm text-[var(--color-muted)]">
-            {dateObj.getDate()} {['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'][dateObj.getMonth()]}
-          </span>
-          <button
-            onClick={() => navigate(`/day/${toISODate(nextDate)}`)}
-            className="p-1.5 hover:bg-[var(--color-cream-dark)] dark:hover:bg-[var(--color-dark-surface-elevated)] rounded-lg transition-colors"
-          >
-            <ArrowRight size={16} className="text-[var(--color-muted)]" />
+          <h1 className="text-xl sm:text-2xl text-[var(--color-primary)] dark:text-[var(--color-cream)]" style={{ fontFamily: 'var(--font-serif)' }}>
+            {formatDateIndonesian(dateObj)}
+          </h1>
+          <button onClick={() => navigate(`/day/${toISODate(nextDate)}`)} className="text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors">
+            <ArrowRight size={16} />
           </button>
         </div>
       </div>
 
-      {/* Title */}
-      <h1
-        className="text-xl sm:text-2xl font-semibold text-[var(--color-primary)] dark:text-[var(--color-cream)] mb-1"
-        style={{ fontFamily: 'var(--font-serif)' }}
-      >
-        Jurnal Harian
-      </h1>
-      <p className="text-sm text-[var(--color-muted)] mb-5">
-        {formatDateIndonesian(dateObj)}
-      </p>
-
-      {/* Daily Summary Bar */}
-      <div className="sticky top-14 z-20 surface-card p-3 mb-4 flex flex-wrap items-center justify-between gap-3 dark:bg-[var(--color-dark-surface)] dark:border-[var(--color-dark-border)]">
-        <div className="flex items-center gap-4 sm:gap-6 text-sm">
-          <div>
-            <span className="text-xs text-[var(--color-muted)]">Pemasukan </span>
-            <span className="font-semibold text-[var(--color-positive)] font-mono-number">{formatRupiah(summary.pemasukan)}</span>
-          </div>
-          <div>
-            <span className="text-xs text-[var(--color-muted)]">Pengeluaran </span>
-            <span className="font-semibold text-[var(--color-danger)] font-mono-number">{formatRupiah(summary.pengeluaran)}</span>
-          </div>
-          <div>
-            <span className="text-xs text-[var(--color-muted)]">Saldo </span>
-            <span className={`font-semibold font-mono-number ${summary.saldo >= 0 ? 'text-[var(--color-primary)] dark:text-[var(--color-accent)]' : 'text-[var(--color-danger)]'}`}>
-              {formatRupiah(summary.saldo)}
-            </span>
-          </div>
-        </div>
-        <button
-          onClick={handleAddRow}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-light)] transition-colors"
-        >
-          <Plus size={14} />
-          Tambah baris
-        </button>
-      </div>
-
-      {/* Transaction Table */}
-      <div className="surface-card overflow-x-auto dark:bg-[var(--color-dark-surface)] dark:border-[var(--color-dark-border)] animate-fade-in-up">
+      {/* Spreadsheet Journal */}
+      <div className="mb-16">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[var(--color-primary)] text-white">
-              <th className="py-2 px-2 text-center text-xs font-medium w-12">#</th>
-              <th className="py-2 px-2 text-left text-xs font-medium">Keterangan</th>
-              <th className="py-2 px-2 text-left text-xs font-medium w-40">Kategori</th>
-              <th className="py-2 px-2 text-right text-xs font-medium w-32">Pemasukan</th>
-              <th className="py-2 px-2 text-right text-xs font-medium w-32">Pengeluaran</th>
-              <th className="py-2 px-2 text-center text-xs font-medium w-10">Aksi</th>
+            <tr className="border-b border-[var(--color-border)] dark:border-[var(--color-dark-border)]">
+              <th className="py-3 px-2 text-center text-[9px] uppercase tracking-widest text-[var(--color-muted)] font-medium w-8"></th>
+              <th className="py-3 px-2 text-left text-[9px] uppercase tracking-widest text-[var(--color-muted)] font-medium">Keterangan</th>
+              <th className="py-3 px-2 text-left text-[9px] uppercase tracking-widest text-[var(--color-muted)] font-medium w-40">Kategori</th>
+              <th className="py-3 px-2 text-right text-[9px] uppercase tracking-widest text-[var(--color-muted)] font-medium w-32">Pemasukan</th>
+              <th className="py-3 px-2 text-right text-[9px] uppercase tracking-widest text-[var(--color-muted)] font-medium w-32">Pengeluaran</th>
+              <th className="py-3 px-2 text-center w-10"></th>
             </tr>
           </thead>
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -379,8 +280,11 @@ export function DayView() {
                     key={tx.id}
                     tx={tx}
                     index={idx}
-                    onUpdate={handleUpdate}
-                    onDelete={handleDelete}
+                    onUpdate={(id, f, v) => updateTransaction(id, { [f]: v })}
+                    onDelete={async (id) => {
+                      await deleteTransaction(id);
+                      toast.undo('Transaksi dihapus', async () => { await restoreTransaction(id); await loadTransactionsByDate(date); });
+                    }}
                     categories={categories}
                     isLast={idx === transactions.length - 1}
                     onAddRow={handleAddRow}
@@ -390,64 +294,59 @@ export function DayView() {
             </SortableContext>
           </DndContext>
 
-          {/* Add row button */}
           <tbody>
-            <tr className="border-b border-[var(--color-border)]/40 dark:border-[var(--color-dark-border)]/40">
-              <td colSpan={6} className="py-2 px-2 text-center">
+            <tr className="border-b border-[var(--color-border)]/50 dark:border-[var(--color-dark-border)]/50">
+              <td colSpan={6} className="py-3 px-2 text-left">
                 <button
                   onClick={handleAddRow}
-                  className="text-xs text-[var(--color-accent)] hover:text-[var(--color-primary)] font-medium transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-[var(--color-muted)] hover:text-[var(--color-primary)] dark:hover:text-[var(--color-dark-text)] font-medium transition-colors"
                 >
-                  + Tambah baris
+                  <Plus size={14} />
+                  Tambah baris ( / )
                 </button>
               </td>
             </tr>
 
             {/* Totals */}
-            <tr className="bg-[var(--color-cream)]/50 dark:bg-[var(--color-dark-surface-elevated)]/50 font-semibold">
-              <td colSpan={3} className="py-2 px-2 text-right text-xs text-[var(--color-muted)] uppercase">Total</td>
-              <td className="py-2 px-2 text-right font-mono-number text-[var(--color-positive)]">{formatRupiah(summary.pemasukan)}</td>
-              <td className="py-2 px-2 text-right font-mono-number text-[var(--color-danger)]">{formatRupiah(summary.pengeluaran)}</td>
+            <tr>
+              <td colSpan={3} className="py-4 px-2 text-right text-[10px] uppercase tracking-widest text-[var(--color-muted)]">Total</td>
+              <td className="py-4 px-2 text-right font-mono-number text-sm text-[var(--color-text)] dark:text-[var(--color-dark-text)]">{formatRupiah(summary.pemasukan)}</td>
+              <td className="py-4 px-2 text-right font-mono-number text-sm text-[var(--color-text)] dark:text-[var(--color-dark-text)]">{formatRupiah(summary.pengeluaran)}</td>
               <td></td>
             </tr>
-            <tr className="bg-[var(--color-cream)]/50 dark:bg-[var(--color-dark-surface-elevated)]/50 font-bold">
-              <td colSpan={3} className="py-2 px-2 text-right text-xs text-[var(--color-muted)] uppercase">Saldo</td>
-              <td colSpan={2} className={`py-2 px-2 text-right font-mono-number ${summary.saldo >= 0 ? 'text-[var(--color-primary)] dark:text-[var(--color-accent)]' : 'text-[var(--color-danger)]'}`}>
+            <tr className="border-t border-[var(--color-border)] dark:border-[var(--color-dark-border)]">
+              <td colSpan={3} className="py-4 px-2 text-right text-[10px] uppercase tracking-widest text-[var(--color-muted)] font-bold">Saldo</td>
+              <td colSpan={2} className={`py-4 px-2 text-right font-mono-number font-medium text-lg ${summary.saldo < 0 ? 'text-[var(--color-danger)]' : 'text-[var(--color-primary)] dark:text-[var(--color-dark-text)]'}`}>
                 {formatRupiah(summary.saldo)}
               </td>
               <td></td>
             </tr>
           </tbody>
         </table>
+
+        {transactions.length === 0 && (
+          <div className="text-center py-20 border-b border-[var(--color-border)] dark:border-[var(--color-dark-border)]">
+            <p className="text-sm text-[var(--color-muted)] mb-4">Belum ada transaksi hari ini</p>
+            <button
+              onClick={handleAddRow}
+              className="px-6 py-2 text-sm bg-[var(--color-primary)] text-[var(--color-cream)] hover:opacity-90 transition-opacity"
+            >
+              Mulai Jurnal
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Empty state */}
-      {transactions.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-sm text-[var(--color-muted)] mb-3">Belum ada transaksi hari ini</p>
-          <button
-            onClick={handleAddRow}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-light)] transition-colors"
-          >
-            <Plus size={16} />
-            Tambah transaksi pertama
-          </button>
-          <p className="text-xs text-[var(--color-muted)] mt-3">
-            Tekan <kbd className="px-1.5 py-0.5 bg-[var(--color-cream-dark)] dark:bg-[var(--color-dark-surface-elevated)] rounded text-[var(--color-secondary)] dark:text-[var(--color-dark-text)] font-mono-number">/</kbd> untuk menambah baris baru
-          </p>
-        </div>
-      )}
-
       {/* Daily Notes */}
-      <div className="mt-6 surface-card p-4 dark:bg-[var(--color-dark-surface)] dark:border-[var(--color-dark-border)]">
-        <label className="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wide block mb-2">
+      <div>
+        <label className="text-[10px] uppercase tracking-widest text-[var(--color-muted)] font-medium block mb-3">
           Catatan Harian
         </label>
         <textarea
           value={dailyNote}
           onChange={(e) => setDailyNote(e.target.value)}
-          placeholder="Tulis catatan untuk hari ini..."
-          className="w-full px-3 py-2 text-sm border border-[var(--color-border)] rounded-lg bg-[var(--color-surface)] dark:bg-[var(--color-dark-surface)] dark:border-[var(--color-dark-border)] dark:text-[var(--color-dark-text)] resize-none h-20 focus:border-[var(--color-accent)] focus:outline-none"
+          placeholder="Tulis impresi atau catatan hari ini..."
+          className="w-full text-sm bg-transparent border-b border-[var(--color-border)] dark:border-[var(--color-dark-border)] dark:text-[var(--color-dark-text)] resize-none h-16 focus:border-[var(--color-primary)] dark:focus:border-[var(--color-dark-text)] focus:outline-none transition-colors"
         />
       </div>
     </div>
